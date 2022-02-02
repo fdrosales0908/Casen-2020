@@ -1,0 +1,291 @@
+---
+title: 'CASEN 2020: ALGUNOS RESULTADOS REGIONALES'
+author: "Francesca Rosales"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Indicadores CASEN 2020: expansión regional
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(rpart)
+library(haven)
+library(foreign)
+
+```
+
+```{r}
+
+casen <- read_dta("C:/Users/asus/Documents/biografia/Casen_expansion/Casen en Pandemia 2020 STATA.dta")
+casen  <- as_factor(casen, only_labelled = TRUE)
+casen <- mutate_if(casen, is.factor, as.character)
+getwd()
+
+```
+
+```
+
+
+
+
+#Seleccionar variables
+```{r}
+
+casen_red <- select(casen, pobreza, educ, activ, etnia, ocup_inf, dautr, qautr,
+                    expr, tipohogar, sexo, edad, zona, yautcorh, r1b, region, ypchautcor)%>%
+  filter(edad>=18)
+
+attach(casen_red)
+summary(casen_red)
+```
+
+
+#Convertir región en vector
+
+
+```{r}
+casen_red <- mutate(casen_red, region_chr = recode(casen_red$region, "1"="Tarapacá", "2"="Antofagasta",
+                                                   "3"="Atacama", "4"= "Coquimbo",
+                                                   "5"="Valparaíso","6"="O'Higgins",
+                                                   "7"="Maule", "8"="Biobío", "9"="La Araucanía",
+                                                   "10"="Los Lagos", "11"="Aysén", "12"="Magallanes",
+                                                   "13"="Metropolitana", "14"="Los Ríos",
+                                                   "15"="Arica", "16"="Ñuble"))
+table(casen_red$region_chr)
+region1 <- mutate(casen_red, region_chr = factor(casen_red$region, 
+                                                labels = c("Tarapacá", "Antofagasta",
+                                                           "Atacama", " Coquimbo",
+                                                           "Valparaíso","O'Higgins",
+                                                           "Maule", "Biobío", "La Araucanía",
+                                                           "Los Lagos","Aysén", "Magallanes",
+                                                           "Metropolitana", "Los Ríos",
+                                                                 "Arica", "Ñuble")))
+class(casen_red$region_chr)  
+
+```
+
+#Variable 1: Sexo
+```{r}
+class(casen_red$sexo)
+casen_red <- mutate(casen_red, sexo_chr = recode(casen_red$sexo, "1" = "hombre", "2" = "mujer"))
+table(casen_red$sexo_chr)
+class(casen_red$sexo_chr)
+#convertir sexo en un vector
+casen_red <- mutate(casen_red, sexo_chr = factor(casen_red$sexo, 
+                                        labels = c("Hombre", "Mujer")))
+
+
+tabla_sexo <-xtabs(expr~sexo_chr+region_chr, data= casen_red)
+tabla_sexo 
+tabla2_sexo <- as.data.frame(tabla_sexo)
+tabla2_sexo
+
+
+write.csv(tabla2_sexo, file = "matp.csv")
+
+                   
+```
+
+#Indicador 2:Pobreza
+
+
+```{r}
+class(casen_red$pobreza)
+tabla_pobreza <-xtabs(expr~pobreza+region_chr, data= casen_red)
+tabla_pobreza  
+#convertir en data frame
+tabla2_pobreza <- as.data.frame(tabla_pobreza)
+tabla2_pobreza
+write.csv(tabla2_pobreza, file = "matp.csv")
+
+```
+
+#Indicador 3: educación
+```{r}
+class(casen_red$educ)
+tabla_educacion <-xtabs(expr~educ+region_chr, data= casen_red)
+tabla_educacion  
+#convertir en data frame
+tabla2_educacion <- as.data.frame(tabla_educacion)
+tabla2_educacion
+write.csv(tabla2_educacion, file = "matp.csv")
+
+```
+
+
+#Indicador 4: actividad
+
+```{r}
+class(casen_red$activ)
+tabla_actividad <-xtabs(expr~activ+region_chr, data= casen_red)
+tabla_actividad 
+#convertir en data frame
+tabla2_actividad <- as.data.frame(tabla_actividad)
+tabla2_actividad
+write.csv(tabla2_actividad, file = "matp.csv")
+
+```
+
+#Indicador 5: Etnia
+
+```{r}
+class(casen_red$etnia)
+
+casen_red <- mutate(casen_red, etnia_chr = recode(casen_red$etnia, "No pertenece a ninguno pueblo indígena" = "No", "Pertenece a pueblos indígenas" = "Si"))
+table(casen_red$etnia_chr)
+class(casen_red$etnia_chr)
+#convertir sexo en un vector
+etnia1 <- mutate(casen_red, etnia_chr = factor(casen_red$etnia_chr, 
+                                                labels = c("No", "Si")))
+
+
+tabla_etnia <-xtabs(expr~etnia_chr+region_chr, data= casen_red)
+tabla_etnia 
+#convertir en data frame
+tabla2_etnia <- as.data.frame(tabla_etnia)
+tabla2_etnia
+write.csv(tabla2_etnia, file = "matp.csv")
+view(tabla2_etnia)
+
+```
+
+#Indicador 6: ocupados informales
+```{r}
+class(casen_red$ocup_inf)
+table(casen_red$ocup_inf)
+tabla_ocup_inf <-xtabs(expr~ocup_inf+region_chr, data= casen_red)
+tabla_ocup_inf 
+#convertir en data frame
+tabla2_ocup_inf <- as.data.frame(tabla_ocup_inf)
+tabla2_ocup_inf
+write.csv(tabla2_ocup_inf, file = "matp.csv")
+
+
+```
+
+#Indicador 7: Decil
+```{r}
+class(casen_red$dautr)
+table(casen_red$dautr)
+tabla_dautr <-xtabs(expr~dautr+region_chr, data= casen_red)
+tabla_dautr 
+#convertir en data frame
+tabla2_dautr <- as.data.frame(tabla_dautr)
+tabla2_dautr
+write.csv(tabla2_dautr, file = "matp.csv")
+
+```
+
+
+#Indicador 8: Tipo de hogar
+
+```{r}
+class(casen_red$tipohogar)
+table(casen_red$tipohogar)
+tabla_tipohogar <-xtabs(expr~tipohogar+region_chr, data= casen_red)
+tabla_tipohogar 
+#convertir en data frame
+tabla2_tipohogar <- as.data.frame(tabla_tipohogar)
+tabla2_tipohogar
+write.csv(tabla2_tipohogar, file = "matp.csv")
+
+```
+
+
+#Indicador 9: Zona
+```{r}
+class(casen_red$zona)
+table(casen_red$zona)
+tabla_zona <-xtabs(expr~zona+region_chr, data= casen_red)
+tabla_zona 
+#convertir en data frame
+tabla2_zona <- as.data.frame(tabla_zona)
+tabla2_zona
+write.csv(tabla2_zona, file = "matp.csv")
+
+```
+
+
+#Indicador 10: Edad
+```{r}
+class(casen_red$edad)
+table(casen_red$edad)
+
+rango <- casen_red %>%
+  mutate(intervalo = case_when(between(edad, 18, 29) ~ "18-29",
+                              between(edad, 30,39) ~ "30-39", 
+                              between(edad, 40,49) ~ "40-49",
+                              between(edad, 50,59) ~ "50-59",
+                              edad > 60 ~ "Más de 60"))
+
+
+tabla_edad <-xtabs(expr~intervalo+region_chr, data= rango)
+tabla_edad 
+#convertir en data frame
+tabla2_edad <- as.data.frame(tabla_edad)
+tabla2_edad
+write.csv(tabla2_edad, file = "matp.csv")
+
+```
+
+#Indicador 11: Nacionalidad
+```{r}
+table(casen_red$r1b)
+casen_red <- mutate(casen_red, nacional = recode(casen_red$r1b, "En [comuna de ubicación la vivienda]" = "Si", "En otra comuna de Chile. Especifique ¿cuál comuna?" = "Si", "En otro país. Especifique ¿cuál país?"="No"))
+table(casen_red$nacional)
+class(casen_red$nacional)
+#convertir sexo en un vector
+nacional <- mutate(casen_red, nacional = factor(casen_red$r1b, 
+                                               labels = c("Si", "Si", "No", "No sabe")))
+
+tabla_nacional <-xtabs(expr~nacional+region_chr, data= casen_red)
+tabla_nacional 
+#convertir en data frame
+tabla2_nacional <- as.data.frame(tabla_nacional)
+tabla2_nacional
+write.csv(tabla2_nacional, file = "matp.csv")
+
+
+```
+
+#Indicador 12: ingreso autónomo pe cápita corregido
+```{r}
+attach(casen_red)
+tabla_ingreso <-xtabs(expr~ypchautcor+region_chr, data= casen_red)
+tabla_ingreso 
+
+#convertir en data frame
+tabla2_ingreso <- as.data.frame(tabla_ingreso)
+tabla2_ingreso
+write.csv(tabla2_ingreso, file = "matp.csv")
+
+
+```
+#Indicador 13: ingreso autónomo corregido
+
+```{r}
+
+attach(casen_red)
+tabla_ingresoaut <-xtabs(expr~yautcorh+region_chr, data= casen_red)
+tabla_ingreso 
+
+#convertir en data frame
+tabla2_ingresoaut <- as.data.frame(tabla_ingresoaut)
+tabla2_ingresoaut
+write.csv(tabla2_ingresoaut, file = "matp.csv")
+
+aggregate(yautcorh,by=list(region_chr),mean,na.rm=TRUE, data=tabla2_ingresoaut)
+boxplot(yautcorh~region_chr)
+
+```
+
+
